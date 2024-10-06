@@ -1,70 +1,128 @@
-# Getting Started with Create React App
+# Black-Scholes Option Pricing with P&L Heatmaps
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a web-based fullstack application that calculates the price of call and put options using the Black-Scholes pricing model. It generates heatmaps to visualize the profit and loss (P&L) based on varying spot prices and volatilities. Users can adjust the volatility and spot price ranges to analyze different scenarios. The project includes a MySQL database to store option data and an API to interact with the data.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- Calculate call and put option prices using the Black-Scholes model.
+- Generate heatmaps to visualize P&L for different spot prices and realized volatilities.
+- Interactive form to update volatility and spot price ranges.
+- Store and retrieve option data from a MySQL database.
+- Secure configuration using environment variables with .env file.
+- Display percentage-based P&L on the heatmap with hover functionality.
 
-### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Technologies Used
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Frontend: React.js, Chart.js
+- Backend: Node.js, Express.js
+- Database: MySQL
+- Environment Configuration: dotenv
+- Styling: Bootstrap
+- Others: cors, mysql2, dotenv
 
-### `npm test`
+## Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Make sure you have the following installed on your machine:
 
-### `npm run build`
+- Node.js (version 14.x or later)
+- MySQL
+- Git
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Setup Instruction
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1. Clone the Repository
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+git clone https://github.com/BhavyaJohar/Black-Scholes-Options-Pricer.git
+cd Black-Scholes-Options-Pricer
+```
 
-### `npm run eject`
+### 2. Backend Setup (Express.js & MySQL)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+#### a. Install Dependencies
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+npm install
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+#### b. Configure .env File
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Create a .env file in the root directory with your database credentials and server configuration. For example:
+```
+DB_HOST=localhost
+DB_USER=yourusername
+DB_PASSWORD=yourpassword
+DB_DATABASE=options_db
+PORT=5001
+```
 
-## Learn More
+#### c. MySQL Setup
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Create a Database:
+```
+CREATE DATABASE options_db;
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. Create a Table:
+```
+USE options_db;
 
-### Code Splitting
+CREATE TABLE options_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    asset_price DECIMAL(10, 2),
+    strike_price DECIMAL(10, 2),
+    maturity DECIMAL(10, 2),
+    volatility DECIMAL(5, 4),
+    risk_free_rate DECIMAL(5, 4),
+    call_price DECIMAL(10, 2),
+    put_price DECIMAL(10, 2)
+);
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+#### d. Start the Backend Server
+```
+node server.js
+```
 
-### Analyzing the Bundle Size
+### 3. Frontend Setup (React.js)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+#### a. Navigate to the Client Directory
+```
+cd client
+```
 
-### Making a Progressive Web App
+#### b. Install Frontend Dependencies
+```
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+#### c. Start the React App
+```
+npm start
+```
 
-### Advanced Configuration
+### 4. Using the Application
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+1. Option Price Calculator:
+- Enter the parameters (Asset Price, Strike Price, Maturity, Volatility, Risk-Free Rate).
+- Click "Calculate Option Price" to compute call and put prices.
+2. Heatmap Visualization:
+- Adjust the volatility and spot price ranges using the provided form.
+- Click "Update Heatmap" to regenerate the P&L heatmap.
+- Hover over each point to see P&L as a percentage, as well as the spot price and volatility.
 
-### Deployment
+### 8. API Endpoints
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- POST /api/saveOptionsData: Save option data (call/put prices and user input).
+- GET /api/getOptionsData: Retrieve all stored option data.
+- GET /api/getLatestOptionsData: Retrieve the most recent entry from the database.
 
-### `npm run build` fails to minify
+### 9. Potential Issues & Debugging
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Error: EADDRINUSE (Address already in use):
+  - Make sure the port (e.g., 5001) is not being used by another application.
+  - Change the port in your .env file if needed.
+- Database Connection Issues:
+  - Ensure your MySQL database is running and accessible.
+  - Check .env for correct database credentials.
