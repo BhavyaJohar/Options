@@ -2,6 +2,9 @@
 
 This project is a web-based fullstack application that calculates the price of call and put options using the Black-Scholes pricing model. It generates heatmaps to visualize the profit and loss (P&L) based on varying spot prices and volatilities. Users can adjust the volatility and spot price ranges to analyze different scenarios. The project includes a MySQL database to store option data and an API to interact with the data.
 
+## Take a Look!
+https://black-scholes-options-pricer.onrender.com/
+
 ## Features
 
 - Calculate call and put option prices using the Black-Scholes model.
