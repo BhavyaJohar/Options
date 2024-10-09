@@ -32,9 +32,9 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
     const volatilityStep = (volatilityMax - volatilityMin) / 10;
 
     // Check if purchase prices are valid
-    if (isNaN(purchaseCallPrice) || isNaN(purchasePutPrice)) {
+    if (!purchaseCallPrice || purchaseCallPrice === 0 || !purchasePutPrice || purchasePutPrice === 0) {
         console.error('Invalid purchase call or put price');
-        return null;
+        return null; // Return null to avoid rendering if prices are invalid
     }
 
     // Generate data points for the heatmap based on user input ranges
@@ -44,21 +44,22 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
             const realizedCallPrice = blackScholes(spot, strikePrice, riskFreeRate, vol, maturity, 'call');
             const realizedPutPrice = blackScholes(spot, strikePrice, riskFreeRate, vol, maturity, 'put');
 
+            // Ensure valid calculations
             if (isNaN(realizedCallPrice) || isNaN(realizedPutPrice)) {
                 continue; // Skip invalid calculations
             }
 
-            // **Ensure Correct P&L Percentage Calculation**
-            const callPnLPercentage = ((realizedCallPrice - purchaseCallPrice) / purchaseCallPrice) * 100;
-            const putPnLPercentage = ((realizedPutPrice - purchasePutPrice) / purchasePutPrice) * 100;
+            // Calculate P&L percentages, avoid division by zero
+            const callPnLPercentage = purchaseCallPrice !== 0 ? ((realizedCallPrice - purchaseCallPrice) / purchaseCallPrice) * 100 : 0;
+            const putPnLPercentage = purchasePutPrice !== 0 ? ((realizedPutPrice - purchasePutPrice) / purchasePutPrice) * 100 : 0;
 
-            // Add data points for call and put P&L with correct labeling
+            // Add data points for call and put P&L with proper labels
             callProfits.push({
                 x: spot,
                 y: vol,
                 r: 15,
                 label: `Spot: ${spot.toFixed(2)}, Vol: ${vol.toFixed(2)}, Call P&L: ${callPnLPercentage.toFixed(2)}%`,
-                backgroundColor: callPnLPercentage >= 0 ? 'rgba(0, 255, 0, 0.6)' : 'rgba(255, 0, 0, 0.6)',
+                backgroundColor: callPnLPercentage >= 0 ? 'rgba(0, 255, 0, 0.6)' : 'rgba(255, 0, 0, 0.6)', // Green for profit, Red for loss
             });
 
             putProfits.push({
@@ -66,7 +67,7 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
                 y: vol,
                 r: 15,
                 label: `Spot: ${spot.toFixed(2)}, Vol: ${vol.toFixed(2)}, Put P&L: ${putPnLPercentage.toFixed(2)}%`,
-                backgroundColor: putPnLPercentage >= 0 ? 'rgba(0, 255, 0, 0.6)' : 'rgba(255, 0, 0, 0.6)',
+                backgroundColor: putPnLPercentage >= 0 ? 'rgba(0, 255, 0, 0.6)' : 'rgba(255, 0, 0, 0.6)', // Green for profit, Red for loss
             });
         }
     }

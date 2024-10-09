@@ -77,10 +77,9 @@ app.get('/api/getOptionsData', (req, res) => {
     });
 });
 
-// API route to fetch the most recent row from the options_data table
+// API route to get latest options data
 app.get('/api/getLatestOptionsData', (req, res) => {
     const query = `SELECT * FROM options_data ORDER BY id DESC LIMIT 1`; // Fetch the most recent row
-
     db.query(query, (err, result) => {
         if (err) {
             return res.status(500).send('Error fetching data from database');
@@ -89,6 +88,46 @@ app.get('/api/getLatestOptionsData', (req, res) => {
     });
 });
 
+app.post('/api/calculatePnL', (req, res) => {
+    const { spotPriceMin, spotPriceMax, volatilityMin, volatilityMax, numSteps } = req.body;
+
+    // Get the most recent option prices from the database
+    db.query('SELECT * FROM options_data ORDER BY id DESC LIMIT 1', (err, result) => {
+        if (err) {
+            return res.status(500).send('Error fetching data from database');
+        }
+
+        const latestData = result[0];
+        const purchaseCallPrice = latestData.call_price;
+        const purchasePutPrice = latestData.put_price;
+
+        const strikePrice = latestData.strike_price;
+        const maturity = latestData.maturity;
+        const riskFreeRate = latestData.risk_free_rate;
+
+        const callPnL = [];
+        const putPnL = [];
+
+        const spotPriceStep = (spotPriceMax - spotPriceMin) / numSteps;
+        const volatilityStep = (volatilityMax - volatilityMin) / numSteps;
+
+        // Calculate P&L for various spot prices and volatilities
+        for (let spot = spotPriceMin; spot <= spotPriceMax; spot += spotPriceStep) {
+            for (let vol = volatilityMin; vol <= volatilityMax; vol += volatilityStep) {
+                const { callPrice, putPrice } = calculateBlackScholes(spot, strikePrice, riskFreeRate, vol, maturity);
+
+                // P&L is the difference between the current option price and the purchase price
+                const callPnLValue = ((callPrice - purchaseCallPrice) / purchaseCallPrice) * 100;
+                const putPnLValue = ((putPrice - purchasePutPrice) / purchasePutPrice) * 100;
+
+                callPnL.push({ spot, vol, pnl: callPnLValue });
+                putPnL.push({ spot, vol, pnl: putPnLValue });
+            }
+        }
+
+        res.json({ callPnL, putPnL });
+    });
+});
 
 // Start the server
 app.listen(PORT, '0.0.0.0',() => {
