@@ -19,7 +19,7 @@ const db = mysql.createConnection({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
-    port: process.env.PORT
+    port: process.env.DB_PORT || 3306 // Use DB_PORT for MySQL and default to 3306 if not provided
 });
 
 // Connect to the database
@@ -130,6 +130,6 @@ app.post('/api/calculatePnL', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, '0.0.0.0',() => {
-    console.log(`Server running on ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
 });
