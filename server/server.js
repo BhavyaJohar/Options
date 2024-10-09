@@ -8,7 +8,7 @@ const cors = require('cors');
 const app = express();
 
 // Use environment variables for sensitive info
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 10000;
 
 app.use(cors());
 app.use(express.json());
