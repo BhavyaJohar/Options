@@ -145,14 +145,14 @@ button:hover {
 .heatmap-column {
   flex: 1 1 45%; /* Default to 45% width on larger screens */
   min-width: 300px; /* Ensure minimum width */
-  max-width: 600px; /* Limit maximum width to avoid leaking */
+  max-width: 1000px; /* Limit maximum width to avoid leaking */
   margin: 0 auto;
 }
 
 /* Make the canvas of the chart responsive */
 .heatmap-column canvas {
   max-width: 100%; /* Ensure canvas shrinks with the container */
-  max-height: 400px; /* Set a maximum height for the heatmap */
+  max-height: 500px; /* Set a maximum height for the heatmap */
 }
 
 /* Stack the heatmaps on smaller screens */
@@ -163,7 +163,7 @@ button:hover {
   }
 
   .heatmap-column canvas {
-    max-height: 300px; /* Reduce the height on small screens */
+    max-height: 400px; /* Reduce the height on small screens */
   }
 }
 
