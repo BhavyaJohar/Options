@@ -34,7 +34,7 @@ const App = () => {
         const assetPrice = parseFloat(formData.assetPrice);
         const strikePrice = parseFloat(formData.strikePrice);
         const maturity = parseFloat(formData.maturity);
-        const volatility = parseFloat(formData.volatility);
+        const volatility = parseFloat(formData.volatility);  // Get the user input for volatility
         const riskFreeRate = parseFloat(formData.riskFreeRate);
 
         const callValue = blackScholes(assetPrice, strikePrice, riskFreeRate, volatility, maturity, 'call').toFixed(2);
@@ -42,14 +42,22 @@ const App = () => {
 
         setOptionPrices({ callValue, putValue });
 
-        // Update the heatmap configuration with the new inputs
+        // Update the heatmap configuration with the new inputs, including volatility
         setHeatmapConfig((prev) => ({
             ...prev,
             strikePrice,
             maturity,
             riskFreeRate,
+            volatility // Include the new volatility in the heatmap config
         }));
+
+        // Update the purchase prices for comparison on the heatmap
+        setPurchasePrices({
+            purchaseCallPrice: parseFloat(callValue),
+            purchasePutPrice: parseFloat(putValue),
+        });
     };
+
 
     // Fetch the most recent option data from the database when the component mounts
     useEffect(() => {
