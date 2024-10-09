@@ -28,8 +28,19 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
     const callProfits = [];
     const putProfits = [];
 
-    const spotPriceStep = (spotPriceMax - spotPriceMin) / 20;
-    const volatilityStep = (volatilityMax - volatilityMin) / 10;
+    // Dynamically adjust steps based on screen size
+    const screenWidth = window.innerWidth;
+    let numSpotSteps = 20;
+    let numVolatilitySteps = 10;
+
+    // Reduce steps for smaller screens to prevent overlap
+    if (screenWidth < 768) {
+        numSpotSteps = 10;  // Fewer steps on small screens
+        numVolatilitySteps = 5;
+    }
+
+    const spotPriceStep = (spotPriceMax - spotPriceMin) / numSpotSteps;
+    const volatilityStep = (volatilityMax - volatilityMin) / numVolatilitySteps;
 
     // Check if purchase prices are valid
     if (!purchaseCallPrice || purchaseCallPrice === 0 || !purchasePutPrice || purchasePutPrice === 0) {
@@ -49,7 +60,7 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
                 continue; // Skip invalid calculations
             }
 
-            // Calculate P&L percentages, avoid division by zero
+            // Calculate P&L percentages
             const callPnLPercentage = purchaseCallPrice !== 0 ? ((realizedCallPrice - purchaseCallPrice) / purchaseCallPrice) * 100 : 0;
             const putPnLPercentage = purchasePutPrice !== 0 ? ((realizedPutPrice - purchasePutPrice) / purchasePutPrice) * 100 : 0;
 
@@ -59,7 +70,7 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
                 y: vol,
                 r: 15,
                 label: `Spot: ${spot.toFixed(2)}, Vol: ${vol.toFixed(2)}, Call P&L: ${callPnLPercentage.toFixed(2)}%`,
-                backgroundColor: callPnLPercentage >= 0 ? 'rgba(0, 255, 0, 0.6)' : 'rgba(255, 0, 0, 0.6)', // Green for profit, Red for loss
+                backgroundColor: callPnLPercentage >= 0 ? 'rgba(0, 255, 0, 0.6)' : 'rgba(255, 0, 0, 0.6)',
             });
 
             putProfits.push({
@@ -67,7 +78,7 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
                 y: vol,
                 r: 15,
                 label: `Spot: ${spot.toFixed(2)}, Vol: ${vol.toFixed(2)}, Put P&L: ${putPnLPercentage.toFixed(2)}%`,
-                backgroundColor: putPnLPercentage >= 0 ? 'rgba(0, 255, 0, 0.6)' : 'rgba(255, 0, 0, 0.6)', // Green for profit, Red for loss
+                backgroundColor: putPnLPercentage >= 0 ? 'rgba(0, 255, 0, 0.6)' : 'rgba(255, 0, 0, 0.6)',
             });
         }
     }

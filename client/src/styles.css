@@ -132,23 +132,38 @@ button:hover {
 }
 
 /* Heatmap layout */
+/* Container to hold the heatmaps */
+/* Container to hold the heatmaps */
 .heatmap-container {
   display: flex;
-  justify-content: space-around; /* Align heatmaps side by side */
-  margin-top: 5px;
-  width: 100%; /* Ensure full width */
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
 }
 
+/* Each heatmap column */
 .heatmap-column {
-  flex: 1;
-  padding: 20px;
-  max-width: 1000px; /* Increase the maximum width */
+  flex: 1 1 45%; /* Default to 45% width on larger screens */
+  min-width: 300px; /* Ensure minimum width */
+  max-width: 600px; /* Limit maximum width to avoid leaking */
+  margin: 0 auto;
 }
 
-/* Stack heatmaps on top of each other on small screens */
+/* Make the canvas of the chart responsive */
+.heatmap-column canvas {
+  max-width: 100%; /* Ensure canvas shrinks with the container */
+  max-height: 400px; /* Set a maximum height for the heatmap */
+}
+
+/* Stack the heatmaps on smaller screens */
 @media (max-width: 768px) {
   .heatmap-column {
     flex: 1 1 100%; /* Take full width on small screens */
+    max-width: 100%; /* Allow heatmaps to take full width */
+  }
+
+  .heatmap-column canvas {
+    max-height: 300px; /* Reduce the height on small screens */
   }
 }
 
