@@ -63,7 +63,7 @@ const App = () => {
     useEffect(() => {
         const fetchLatestData = async () => {
             try {
-                const response = await fetch('http://localhost:5001/api/getLatestOptionsData');
+                const response = await fetch('http://localhost:4000/api/getLatestOptionsData');
                 const data = await response.json();
 
                 // Set the purchase prices for call and put
