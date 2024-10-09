@@ -16,7 +16,8 @@ This project is a web-based fullstack application that calculates the price of c
 
 - Frontend: React.js, Chart.js
 - Backend: Node.js, Express.js
-- Database: MySQL
+- Database: MySQL (Deployed on AWS RDS)
+- Deployment: Render (for the fullstack app)
 - Environment Configuration: dotenv
 - Styling: Bootstrap
 - Others: cors, mysql2, dotenv
@@ -50,11 +51,12 @@ npm install
 
 Create a .env file in the root directory with your database credentials and server configuration. For example:
 ```
-DB_HOST=localhost
+DB_HOST=your-aws-rds-endpoint
 DB_USER=yourusername
 DB_PASSWORD=yourpassword
-DB_DATABASE=options_db
-PORT=5001
+DB_DATABASE=databasename
+DB_PORT=3306
+PORT=4000
 ```
 
 #### c. MySQL Setup
@@ -82,7 +84,7 @@ CREATE TABLE options_data (
 
 #### d. Start the Backend Server
 ```
-node server.js
+npm start --prefix server
 ```
 
 ### 3. Frontend Setup (React.js)
