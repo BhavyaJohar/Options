@@ -8,7 +8,7 @@ const cors = require('cors');
 const app = express();
 
 // Use environment variables for sensitive info
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
@@ -130,6 +130,6 @@ app.post('/api/calculatePnL', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
