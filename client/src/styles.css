@@ -131,25 +131,31 @@ button:hover {
   font-weight: bold;
 }
 
-/* Heatmap styling */
+/* Heatmap layout */
 .heatmap-container {
   display: flex;
-  flex-direction: row; /* Ensure they are always side by side */
-  justify-content: center;
-  align-items: center;
-  gap: 20px; /* Space between the heatmaps */
-  margin: 0 auto;
+  justify-content: space-around; /* Align heatmaps side by side */
+  margin-top: 5px;
+  width: 100%; /* Ensure full width */
 }
 
 .heatmap-column {
-  width: 100%;
-  max-width: 100rem; /* Set a max width for each heatmap */
-  margin: 0 auto;
-  height: 400px; /* Fixed height for both heatmaps */
+  flex: 1;
+  padding: 20px;
+  max-width: 1000px; /* Increase the maximum width */
 }
 
-/* You can remove the media queries for responsiveness */
+/* Media query for mobile screens */
+@media (max-width: 768px) {
+  .heatmap-container {
+    flex-direction: column; /* Stack heatmaps on top of each other */
+  }
 
+  .heatmap-column {
+    max-width: 100%; /* Allow full width for mobile */
+    margin-bottom: 10px; /* Add space between stacked heatmaps */
+  }
+}
 
 .scatter-chart {
   width: 100%;

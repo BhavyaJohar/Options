@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Scatter } from 'react-chartjs-2';
 import { blackScholes } from '../blackScholes';
 import {
@@ -25,11 +25,42 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
         riskFreeRate,
     } = heatmapData;
 
+    const [spotPriceStep, setSpotPriceStep] = useState((spotPriceMax - spotPriceMin) / 20);
+    const [volatilityStep, setVolatilityStep] = useState((volatilityMax - volatilityMin) / 10);
+
+    // Function to adjust steps based on screen size
+    const updateStepsBasedOnScreenSize = () => {
+        const screenWidth = window.innerWidth;
+
+        // Change the step sizes for smaller screens
+        if (screenWidth <= 425) {
+            setSpotPriceStep((spotPriceMax - spotPriceMin) / 10); // Larger steps for smaller screens
+            setVolatilityStep((volatilityMax - volatilityMin) / 4); // Larger steps for smaller screens
+        } else if (screenWidth <= 768) {
+            setSpotPriceStep((spotPriceMax - spotPriceMin) / 20); // Default steps for larger screens
+            setVolatilityStep((volatilityMax - volatilityMin) / 10); // Default steps for larger screens
+        } else {
+            setSpotPriceStep((spotPriceMax - spotPriceMin) / 20); // Default steps for larger screens
+            setVolatilityStep((volatilityMax - volatilityMin) / 10); // Default steps for larger screens
+        }
+    };
+
+    // Use useEffect to monitor the window resize event
+    useEffect(() => {
+        // Set initial steps based on the initial screen size
+        updateStepsBasedOnScreenSize();
+
+        // Update steps whenever the window is resized
+        window.addEventListener('resize', updateStepsBasedOnScreenSize);
+
+        // Clean up the event listener on component unmount
+        return () => {
+            window.removeEventListener('resize', updateStepsBasedOnScreenSize);
+        };
+    }, [spotPriceMin, spotPriceMax, volatilityMin, volatilityMax]);
+
     const callProfits = [];
     const putProfits = [];
-
-    const spotPriceStep = (spotPriceMax - spotPriceMin) / 20;
-    const volatilityStep = (volatilityMax - volatilityMin) / 10;
 
     // Check if purchase prices are valid
     if (!purchaseCallPrice || purchaseCallPrice === 0 || !purchasePutPrice || purchasePutPrice === 0) {
