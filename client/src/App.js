@@ -63,7 +63,7 @@ const App = () => {
     useEffect(() => {
         const fetchLatestData = async () => {
             try {
-                const response = await fetch('https://black-scholes-options-pricer.onrender.com:4000/api/getLatestOptionsData');
+                const response = await fetch('https://black-scholes-options-pricer.onrender.com/api/getLatestOptionsData');
                 const data = await response.json();
 
                 // Set the purchase prices for call and put

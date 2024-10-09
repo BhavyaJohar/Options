@@ -18,7 +18,7 @@ const InputForm = ({ onCalculate }) => {
     // Function to send the form data to the backend for saving
     const saveFormData = async () => {
         try {
-            const response = await fetch('https://black-scholes-options-pricer.onrender.com:4000/api/saveOptionsData', {
+            const response = await fetch('https://black-scholes-options-pricer.onrender.com/api/saveOptionsData', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
