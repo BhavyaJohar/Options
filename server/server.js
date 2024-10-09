@@ -31,6 +31,13 @@ db.connect(err => {
     console.log('Connected to MySQL database');
 });
 
+app.use(express.static(path.join(__dirname, '../client/build')));
+
+// Handle any requests that don't match the API routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+});
+
 // Black-Scholes calculation function
 const calculateBlackScholes = (S, K, r, sigma, T) => {
     const d1 = (Math.log(S / K) + (r + (Math.pow(sigma, 2) / 2)) * T) / (sigma * Math.sqrt(T));
