@@ -9,7 +9,7 @@ const path = require('path'); // Import path module
 const app = express();
 
 // Use environment variables for sensitive info
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
@@ -32,11 +32,18 @@ db.connect(err => {
     console.log('Connected to MySQL database');
 });
 
-app.use(express.static(path.join(__dirname, '../client/build')));
+// Serve static files from the React app in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../client/build')));
+}
 
 // Handle any requests that don't match the API routes
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+    if (process.env.NODE_ENV === 'production') {
+        res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+    } else {
+        res.status(404).send('Not found');
+    }
 });
 
 // Black-Scholes calculation function

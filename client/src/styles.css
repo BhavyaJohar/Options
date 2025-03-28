@@ -167,3 +167,43 @@ h3, h2 {
   text-align: center;
   color: #ffffff;
 }
+
+.color-scale {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.color-scale-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.color-scale-gradient {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.color-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.color-block {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.color-value {
+    font-size: 0.8em;
+    color: #666;
+}
