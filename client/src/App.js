@@ -4,6 +4,7 @@ import InputForm from './components/InputForm';
 import OptionPriceDisplay from './components/OptionPriceDisplay';
 import Heatmap from './components/Heatmap';
 import { blackScholes } from './blackScholes';
+import config from './config';
 import './styles.css';
 
 const App = () => {
@@ -63,7 +64,7 @@ const App = () => {
     useEffect(() => {
         const fetchLatestData = async () => {
             try {
-                const response = await fetch('https://black-scholes-options-pricer.onrender.com/api/getLatestOptionsData');
+                const response = await fetch(`${config.apiUrl}/getLatestOptionsData`);
                 const data = await response.json();
 
                 // Set the purchase prices for call and put

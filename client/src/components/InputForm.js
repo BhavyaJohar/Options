@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import config from '../config';
 
 const InputForm = ({ onCalculate }) => {
     const [formData, setFormData] = useState({
@@ -52,7 +53,7 @@ const InputForm = ({ onCalculate }) => {
     // Function to send the form data to the backend for saving
     const saveFormData = async () => {
         try {
-            const response = await fetch('https://black-scholes-options-pricer.onrender.com/api/saveOptionsData', {
+            const response = await fetch(`${config.apiUrl}/saveOptionsData`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
