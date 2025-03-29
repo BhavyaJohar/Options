@@ -19,8 +19,28 @@ function calculateD2(d1, sigma, T) {
 // Black-Scholes function that handles both call and put option pricing
 export function blackScholes(S, K, r, sigma, T, optionType = 'call') {
     // Prevent division by zero or invalid inputs
-    if (S <= 0 || K <= 0 || sigma <= 0 || T <= 0) {
+    if (typeof S !== 'number' || typeof K !== 'number' || 
+        typeof r !== 'number' || typeof sigma !== 'number' || 
+        typeof T !== 'number') {
         return NaN;
+    }
+
+    if (sigma === 0) {
+        // For zero volatility, the option is worth its intrinsic value
+        if (optionType === 'call') {
+            return Math.max(S - K * exp(-r * T), 0);
+        } else {
+            return Math.max(K * exp(-r * T) - S, 0);
+        }
+    }
+
+    if (T < 0.0001) { // Less than 1 day
+        // For very small T, use intrinsic value
+        if (optionType === 'call') {
+            return Math.max(S - K, 0);
+        } else {
+            return Math.max(K - S, 0);
+        }
     }
 
     const d1 = calculateD1(S, K, r, sigma, T);

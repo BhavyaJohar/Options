@@ -188,11 +188,17 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
 
     // Configuration for the heatmap display
     const options = {
+        responsive: true,
         scales: {
             x: {
                 title: {
                     display: true,
                     text: 'Spot Price',
+                    color: '#ffffff',
+                },
+                ticks: {
+                    color: '#ffffff',
+                    padding: 5,
                 },
                 grid: {
                     drawOnChartArea: false,
@@ -202,6 +208,11 @@ const Heatmap = ({ heatmapData, purchaseCallPrice, purchasePutPrice }) => {
                 title: {
                     display: true,
                     text: 'Realized Volatility',
+                    color: '#ffffff',
+                },
+                ticks: {
+                    color: '#ffffff',
+                    padding: 5,
                 },
                 grid: {
                     drawOnChartArea: false,
