@@ -30,7 +30,9 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
     return (
       <div className="bg-[#2D3748] p-4 rounded-lg border border-[#4A5568] shadow-lg">
         <p className="text-[#8E9196]">Stock Price: ${label.toFixed(2)}</p>
-        <p className="text-[#8E9196]">P/L: ${payload?.[0]?.value?.toFixed(2) ?? '0.00'}</p>
+        <p className="text-[#8E9196]">
+          P/L: ${payload?.[0]?.payload?.profitLoss?.toFixed(2) ?? '0.00'}
+        </p>
       </div>
     );
   }
