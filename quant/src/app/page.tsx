@@ -346,6 +346,29 @@ export default function Home() {
           optionPrice={bsPrice ? Number.parseFloat(bsPrice) : null}
           optionType={formData.optionType}
         />
+
+        {/* Footer */}
+        <footer className="mt-12 text-center text-[#8E9196]">
+          <p className="mb-2">Created by Bhavya Johar</p>
+          <div className="flex justify-center gap-4">
+            <a
+              href="https://github.com/BhavyaJohar/Options"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[#8B5CF6] transition-colors"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://www.linkedin.com/in/bhavya-johar-5571b4170/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[#8B5CF6] transition-colors"
+            >
+              LinkedIn
+            </a>
+          </div>
+        </footer>
       </div>
     </div>
   );
