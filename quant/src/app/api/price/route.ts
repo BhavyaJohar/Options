@@ -56,7 +56,7 @@ function binomialTreePrice(
   return values[0];
 }
 
-function blackScholes(
+export function blackScholes(
   S: number, // Current stock price
   K: number, // Strike price
   T: number, // Time to expiration in years
