@@ -3,14 +3,42 @@
 import { useState, useEffect } from 'react';
 import PayoffDiagram from './components/PayoffDiagram';
 
+interface FormData {
+  ticker: string;
+  strikePrice: string;
+  optionType: 'call' | 'put';
+  expiration: string;
+  volatility: string;
+  riskFreeRate: string;
+}
+
+interface CachedStockPrice {
+  price: number;
+  ticker: string;
+}
+
 export default function Home() {
-  const [formData, setFormData] = useState({
-    ticker: '',
-    strikePrice: '',
-    optionType: 'call',
-    expiration: '',
-    volatility: '0.3',
-    riskFreeRate: '0.04'
+  const [formData, setFormData] = useState<FormData>(() => {
+    // Try to load saved form data from localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('options_form_data');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          localStorage.removeItem('options_form_data');
+        }
+      }
+    }
+    // Default values if no saved data
+    return {
+      ticker: '',
+      strikePrice: '',
+      optionType: 'call',
+      expiration: '',
+      volatility: '0.3',
+      riskFreeRate: '0.03'
+    };
   });
 
   const [bsPrice, setBsPrice] = useState<string | null>(null);
@@ -26,14 +54,46 @@ export default function Home() {
     rho: number;
   } | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<
-    HTMLInputElement | HTMLSelectElement
-  >) => {
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('options_form_data', JSON.stringify(formData));
+  }, [formData]);
+
+  // Save results to localStorage whenever they change
+  useEffect(() => {
+    if (bsPrice && binomialPrice && greeks) {
+      localStorage.setItem('options_results', JSON.stringify({
+        bsPrice,
+        binomialPrice,
+        greeks,
+        timestamp: new Date().toISOString()
+      }));
+    }
+  }, [bsPrice, binomialPrice, greeks]);
+
+  // Load saved results on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('options_results');
+      if (saved) {
+        try {
+          const { bsPrice: savedBsPrice, binomialPrice: savedBinomialPrice, greeks: savedGreeks } = JSON.parse(saved);
+          setBsPrice(savedBsPrice);
+          setBinomialPrice(savedBinomialPrice);
+          setGreeks(savedGreeks);
+        } catch {
+          localStorage.removeItem('options_results');
+        }
+      }
+    }
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === 'ticker') {
-      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
+      setFormData((prev: FormData) => ({ ...prev, [name]: value.toUpperCase() }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev: FormData) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -46,6 +106,19 @@ export default function Home() {
         return;
       }
 
+      // Check cache first
+      const cached = localStorage.getItem(`stock_price_${formData.ticker}`);
+      if (cached) {
+        try {
+          const { price } = JSON.parse(cached) as CachedStockPrice;
+          setCurrentPrice(price);
+          setError(null);
+          return;
+        } catch {
+          localStorage.removeItem(`stock_price_${formData.ticker}`);
+        }
+      }
+
       setIsLoading(true);
       setError(null);
       try {
@@ -55,6 +128,11 @@ export default function Home() {
         if (response.ok) {
           setCurrentPrice(data.price);
           setError(null);
+          // Cache the result
+          localStorage.setItem(`stock_price_${formData.ticker}`, JSON.stringify({
+            price: data.price,
+            ticker: formData.ticker
+          }));
         } else {
           setError(data.error || 'Failed to fetch stock price');
           setCurrentPrice(null);
@@ -148,6 +226,14 @@ export default function Home() {
             Options Price Calculator
           </h1>
           <p className="text-[#8E9196]">Visualize and analyze your options positions</p>
+          <div className="flex justify-center gap-4 mb-4 mt-4">
+            <a
+              href="/portfolio"
+              className="px-4 py-2 bg-[#8B5CF6]/20 text-[#8B5CF6] rounded-lg hover:bg-[#8B5CF6]/30 transition-colors"
+            >
+              Analyze Your Portfolio
+            </a>
+          </div>
         </div>
 
         {/* Input Form */}
@@ -251,7 +337,7 @@ export default function Home() {
               value={formData.riskFreeRate}
               onChange={handleInputChange}
               className="w-full px-4 py-3 bg-[#1A1F2C] border border-[#4A5568] rounded-lg focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent transition-all"
-              placeholder="0.04"
+              placeholder="0.03"
               step="0.01"
               min="0"
               max="0.2"
@@ -349,7 +435,7 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="mt-12 text-center text-[#8E9196]">
-          <p className="mb-2">Created by Bhavya Johar</p>
+          <p className="mb-2">Created by <a href="https://bhavyarjohar.com/" target="_blank" rel="noopener noreferrer" className="hover:text-[#8B5CF6] transition-colors">Bhavya Johar</a></p>
           <div className="flex justify-center gap-4">
             <a
               href="https://github.com/BhavyaJohar/Options"

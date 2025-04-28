@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Options Price Calculator | Black-Scholes & Binomial Models",
+  title: "Options & Portfolio Analysis | Black-Scholes & Portfolio Metrics",
   description:
-    "A modern options pricing tool built by Bhavya Johar. Calculate theoretical option prices using Black-Scholes and Binomial Tree models. Visualize payoffs, Greeks, and build custom strategies.",
+    "A modern financial analysis tool built by Bhavya Johar. Calculate theoretical option prices using Black-Scholes and Binomial Tree models. Analyze portfolio performance with metrics like Alpha, Beta, Sharpe Ratio, and Monte Carlo simulations.",
   keywords: [
     "options pricing",
     "Black-Scholes calculator",
@@ -24,17 +24,22 @@ export const metadata: Metadata = {
     "option payoff diagram",
     "Greeks",
     "financial modeling",
+    "portfolio analysis",
+    "alpha beta analysis",
+    "sharpe ratio calculator",
+    "monte carlo simulation",
+    "portfolio metrics",
     "Bhavya Johar",
     "options strategies"
   ],
   authors: [{ name: "Bhavya Johar", url: "https://bhavyarjohar.com" }],
   creator: "Bhavya Johar",
   openGraph: {
-    title: "Options Price Calculator | Black-Scholes & Binomial Models",
+    title: "Options & Portfolio Analysis | Black-Scholes & Portfolio Metrics",
     description:
-      "Interactive options pricing tool built by Bhavya Johar. Supports Black-Scholes and Binomial models with real-time diagrams and analysis.",
-    url: "https://black-scholes-options-pricer.vercel.app/",
-    siteName: "Options Price Calculator",
+      "Interactive financial analysis tool built by Bhavya Johar. Features options pricing with Black-Scholes and Binomial models, plus comprehensive portfolio analysis with Alpha, Beta, Sharpe Ratio, and Monte Carlo simulations.",
+    url: "https://bhavyas-options-pricing.vercel.app/",
+    siteName: "Options & Portfolio Analysis",
     type: "website"
   },
 };
