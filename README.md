@@ -1,11 +1,12 @@
-# Options Price Calculator
+# Options & Portfolio Analysis Tool
 
-A Next.js‑based options pricing and visualization tool that combines real‑time market data with theoretical models (Black‑Scholes and Binomial Tree) to help you explore and analyze option strategies.
+A comprehensive Next.js‑based financial analysis platform that combines real‑time market data with theoretical models for options pricing and portfolio analysis. Built with modern web technologies and designed for both retail and professional investors.
 
 ---
 
 ## Features
 
+### Options Analysis
 - **Options Chain Lookup**  
   Fetch live option chains from Polygon.io by ticker symbol.
 
@@ -18,7 +19,7 @@ A Next.js‑based options pricing and visualization tool that combines real‑ti
 - **Interactive Payoff Diagrams**  
   Static expiration payoff curves with red/green shading for negative/positive P&L, plus reference lines for strike, current, and break‑even prices.
 
-- **Custom “Bento” UI**  
+- **Custom "Bento" UI**  
   A modern, responsive grid layout to build positions manually:  
   - Ticker  
   - Strike Price  
@@ -26,6 +27,29 @@ A Next.js‑based options pricing and visualization tool that combines real‑ti
   - Position (Long/Short)  
   - Days to Expiration  
   - Premium
+
+### Portfolio Analysis
+- **Portfolio Management**  
+  - Add and manage multiple positions
+  - Track long and short positions
+  - Real-time portfolio value calculation
+  - Position distribution visualization
+
+- **Advanced Analytics**  
+  - Alpha/Beta analysis
+  - Sharpe Ratio calculation
+  - Total Return metrics
+  - Monte Carlo simulations for risk assessment
+
+- **Performance Visualization**  
+  - Interactive pie charts for position distribution
+  - Monte Carlo simulation histograms
+  - Performance metrics dashboard
+
+- **Data Persistence**  
+  - Local storage caching for positions
+  - Cached analysis results with automatic refresh
+  - Persistent form data across sessions
 
 ---
 
@@ -36,12 +60,19 @@ quant/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── options/route.ts    # GET /api/options → fetch option chain
-│   │   │   └── price/route.ts      # POST /api/price  → compute price & Greeks (BS + Binomial)
-│   │   └── page.tsx                # Main UI: form + payoff chart + pricing results
-│   └── components/
-│       └── PayoffDiagram.tsx       # Reusable payoff chart component
-├── .env                            # NEXT_PUBLIC_POLYGON_API_KEY
+│   │   │   ├── options/route.ts     # GET /api/options → fetch option chain
+│   │   │   ├── price/route.ts       # POST /api/price  → compute price & Greeks
+│   │   │   ├── portfolio/route.ts   # POST /api/portfolio → analyze portfolio
+│   │   │   └── stocks/route.ts      # GET /api/stocks → fetch stock prices
+│   │   ├── portfolio/
+│   │   │   └── page.tsx             # Portfolio analysis UI
+│   │   └── page.tsx                 # Options pricing UI
+│   ├── components/
+│   │   ├── PayoffDiagram.tsx        # Reusable payoff chart component
+│   │   └── PortfolioMetrics.tsx     # Portfolio metrics display
+│   └── lib/
+│       └── calculations.ts          # Financial calculations utilities
+├── .env                            # Environment variables
 └── package.json                    # Dependencies & scripts
 ```
 
@@ -51,8 +82,8 @@ quant/
 
 1. **Clone the repo**  
    ```bash
-   git clone https://github.com/your‑org/options‑price‑calculator.git
-   cd options‑price‑calculator/quant
+   git clone https://github.com/BhavyaJohar/Options.git
+   cd Options/quant
    ```
 
 2. **Install dependencies**  
@@ -63,7 +94,7 @@ quant/
    ```
 
 3. **Configure environment**  
-   Create a `.env` file at the project root with your Polygon API key:
+   Create a `.env` file at the project root:
    ```env
    NEXT_PUBLIC_POLYGON_API_KEY=your_polygon_api_key_here
    ```
@@ -78,7 +109,7 @@ quant/
   # or
   yarn dev
   ```
-  The app will be available at `http://localhost:3000`.
+  The app will be available at `http://localhost:3000`.
 
 - **Build for production**  
   ```bash
@@ -94,69 +125,38 @@ quant/
 ## API Endpoints
 
 ### `/api/options` (GET)
-
 Fetches the options chain for a given stock ticker.
 
-- **Query Parameters**:  
-  - `ticker` (string) — Stock symbol (e.g. `AAPL`)
-
-- **Response**:  
-  ```json
-  {
-    "results": [
-      {
-        "strike": 100,
-        "expirationDate": "2025-05-17",
-        "bid": 2.5,
-        "ask": 2.6,
-        …
-      },
-      …
-    ]
-  }
-  ```
-
 ### `/api/price` (POST)
-
 Computes theoretical option price and Greeks via both Black‑Scholes and a Binomial Tree.
 
-- **Request Body**:
-  ```json
-  {
-    "S": 150.0,         // Current underlying price
-    "K": 155.0,         // Strike price
-    "T": 30,            // Days to expiration
-    "r": 0.05,          // Risk‑free rate (annual decimal)
-    "sigma": 0.3,       // Volatility (decimal)
-    "type": "call",     // "call" or "put"
-    "position": "long", // "long" or "short"
-    "premium": 2.5,     // Premium paid/received
-    "steps": 100        // Binomial tree steps (optional, default 100)
-  }
-  ```
+### `/api/portfolio` (POST)
+Analyzes portfolio performance and risk metrics.
 
-- **Response**:
-  ```json
-  {
-    "price": 3.12,         // Black‑Scholes price
-    "delta": 0.62,
-    "gamma": 0.025,
-    "theta": -0.045,       // per day
-    "vega": 0.12,          // per 1% vol
-    "rho": 0.018,          // per 1% rate
-    "binomialPrice": 3.15, // Binomial Tree price
-    "pnlCurve": [ … ]      // Array of { price, pnl, delta, gamma }
-  }
-  ```
+### `/api/stocks` (GET)
+Fetches current stock prices with caching support.
 
 ---
 
-## Styling & UI
+## Technical Stack
 
-- Tailwind CSS for utility‑first styling  
-- Dark theme with vibrant accent colors  
-- Responsive “bento‐box” layout for form controls  
-- Recharts for dynamic, interactive charts
+- **Frontend**: Next.js 14, React, TypeScript
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+- **Data**: Polygon.io API
+- **State Management**: React Hooks
+- **Caching**: LocalStorage
+- **Deployment**: Vercel
+
+---
+
+## Performance Optimizations
+
+- Client-side caching for stock prices and analysis results
+- Debounced API calls for stock lookups
+- Optimized Monte Carlo simulations
+- Responsive design for all device sizes
+- Efficient state management with React hooks
 
 ---
 
@@ -166,5 +166,17 @@ Computes theoretical option price and Greeks via both Black‑Scholes and a Bino
 2. Create a new branch: `git checkout -b feat/my-feature`  
 3. Commit your changes & push: `git push origin feat/my-feature`  
 4. Open a Pull Request
+
+---
+
+## License
+
+MIT License
+
+---
+
+## Author
+
+[Bhavya Johar](https://bhavyarjohar.com) - Computer Science & Finance at UVA
 
 ---
