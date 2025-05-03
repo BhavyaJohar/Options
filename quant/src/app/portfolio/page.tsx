@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import type { FormEvent } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import Link from 'next/link';
+import { UserCircleIcon } from '@heroicons/react/24/outline';
 
 interface Position {
   id: string;
@@ -100,6 +102,155 @@ export default function Portfolio() {
   const [finalReturns, setFinalReturns] = useState<number[]>([]);
   const [simResults, setSimResults] = useState<{ p5: number; p50: number; p95: number } | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
+  // Authentication states
+  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showPortfolioDropdown, setShowPortfolioDropdown] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authUsername, setAuthUsername] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+
+  // Load current user from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem('currentUser');
+      }
+    }
+  }, []);
+
+  // Persist current user to localStorage
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('currentUser');
+    }
+  }, [currentUser]);
+
+  // Profile dropdown and available portfolio names
+  const [portfolioNames, setPortfolioNames] = useState<string[]>([]);
+
+  // Load list of portfolio names when user logs in
+  useEffect(() => {
+    if (currentUser) {
+      fetch(`/api/user/portfolios?user_id=${currentUser.id}`)
+        .then(res => res.json())
+        .then(data => setPortfolioNames(data.portfolios || []))
+        .catch(console.error);
+    } else {
+      setPortfolioNames([]);
+      setShowDropdown(false);
+    }
+  }, [currentUser]);
+
+  // Handle authentication (login/signup)
+  const handleAuthSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    try {
+      const response = await fetch(`/api/auth/${authMode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: authUsername, password: authPassword }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Authentication failed');
+      }
+      setCurrentUser({ id: data.id, username: data.username });
+      setShowAuthModal(false);
+      setAuthUsername('');
+      setAuthPassword('');
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    setCurrentUser(null);
+  };
+
+  // Handle saving portfolio (with user-defined name)
+  const handleSavePortfolio = async () => {
+    if (!currentUser) {
+      setAuthMode('login');
+      setShowAuthModal(true);
+      return;
+    }
+    if (positions.length === 0) {
+      alert('No positions to save');
+      return;
+    }
+    const name = window.prompt('Enter a name for this portfolio');
+    if (!name) {
+      return;
+    }
+    try {
+      // Save each position under the given portfolio name
+      await Promise.all(
+        positions.map((pos) =>
+          fetch('/api/user/portfolio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: currentUser.id,
+              symbol: pos.ticker,
+              quantity: pos.quantity,
+              cost_basis: pos.averagePrice,
+              purchased_at: new Date().toISOString().split('T')[0],
+              portfolio_name: name,
+            }),
+          })
+        )
+      );
+      // Refresh portfolio list
+      const res = await fetch(`/api/user/portfolios?user_id=${currentUser.id}`);
+      const data = await res.json();
+      setPortfolioNames(data.portfolios);
+      alert(`Portfolio "${name}" saved successfully`);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save portfolio');
+    }
+  };
+
+  const handleLoadPortfolio = async (name: string) => {
+    if (!currentUser) {
+      setAuthMode('login');
+      setShowAuthModal(true);
+      return;
+    }
+    setShowDropdown(false);
+    try {
+      const res = await fetch(
+        `/api/user/portfolio?user_id=${currentUser.id}&portfolio_name=${encodeURIComponent(
+          name
+        )}`
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to load portfolio');
+      }
+      const loaded: Position[] = data.positions.map((row: { id: number; symbol: string; quantity: number; cost_basis: number }) => ({
+        id: row.id.toString(),
+        ticker: row.symbol,
+        quantity: row.quantity,
+        averagePrice: row.cost_basis,
+        positionType: 'long',
+      }));
+      setPositions(loaded);
+    } catch (err: unknown) {
+      console.error(err);
+      alert(`Failed to load portfolio${err instanceof Error ? `: ${err.message}` : ''}`);
+    }
+  };
 
   // Persist positions to localStorage
   useEffect(() => {
@@ -316,7 +467,140 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1A1F2C] to-[#0F172A] text-white p-8">
+    <div className="relative min-h-screen bg-gradient-to-br from-[#1A1F2C] to-[#0F172A] text-white p-8">
+      {/* User menu icon and actions */}
+      <div className="absolute top-4 right-4 flex items-center space-x-2">
+        {currentUser ? (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowDropdown((prev) => !prev)}
+              className="p-1 rounded-full hover:bg-white/20"
+            >
+              <UserCircleIcon className="h-8 w-8 text-white" />
+            </button>
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-[#2D3748] border border-[#4A5568] rounded-lg shadow-lg z-50">
+                <div className="p-2 text-white">
+                  <p className="px-4 py-2">Hi, {currentUser.username}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDropdown(false);
+                      setShowPortfolioDropdown(true);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#4A5568]"
+                  >
+                    My Portfolios
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDropdown(false);
+                      handleSavePortfolio();
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#4A5568]"
+                  >
+                    Save Portfolio
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDropdown(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left px-4 py-2 text-red-400 hover:bg-[#4A5568]"
+                  >
+                    Log out
+                  </button>
+                </div>
+              </div>
+            )}
+            {showPortfolioDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-[#2D3748] border border-[#4A5568] rounded-lg shadow-lg z-50">
+                <div className="p-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPortfolioDropdown(false);
+                      setShowDropdown(true);
+                    }}
+                    className="w-full text-left px-4 py-2 text-white hover:bg-[#4A5568]"
+                  >
+                    ← Back
+                  </button>
+                  {portfolioNames.length > 0 ? (
+                    portfolioNames.map((name) => (
+                      <button
+                        type="button"
+                        key={name}
+                        onClick={() => {
+                          setShowPortfolioDropdown(false);
+                          handleLoadPortfolio(name);
+                        }}
+                        className="w-full text-left px-4 py-2 text-white hover:bg-[#4A5568]"
+                      >
+                        {name}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-4 py-2 text-[#8E9196]">No portfolios</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setAuthMode('login');
+              setShowAuthModal(true);
+            }}
+            className="p-1 rounded-full hover:bg-white/20"
+          >
+            <UserCircleIcon className="h-8 w-8 text-white" />
+          </button>
+        )}
+      </div>
+      {/* Authentication Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded p-6 w-80 relative">
+            <h2 className="text-xl font-semibold mb-4">{authMode === 'login' ? 'Log In' : 'Sign Up'}</h2>
+            {authError && <p className="text-red-500 mb-2">{authError}</p>}
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              <input
+                type="text"
+                placeholder="Username"
+                value={authUsername}
+                onChange={(e) => setAuthUsername(e.target.value)}
+                className="w-full px-3 py-2 border rounded"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                className="w-full px-3 py-2 border rounded"
+              />
+              <button type="submit" className="w-full px-3 py-2 bg-blue-600 text-white rounded">
+                {authMode === 'login' ? 'Log In' : 'Sign Up'}
+              </button>
+            </form>
+            <p className="mt-4 text-center text-sm">
+              {authMode === 'login' ? (
+                <>Don&apos;t have an account? <button type="button" onClick={() => setAuthMode('signup')} className="text-blue-600">Sign Up</button></>
+              ) : (
+                <>Have an account? <button type="button" onClick={() => setAuthMode('login')} className="text-blue-600">Log In</button></>
+              )}
+            </p>
+            <button type="button" onClick={() => setShowAuthModal(false)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] bg-clip-text text-transparent">
