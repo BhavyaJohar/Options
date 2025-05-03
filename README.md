@@ -6,9 +6,16 @@ A comprehensive Next.js‑based financial analysis platform that combines real�
 
 ## Features
 
+### Authentication & User Management
+- **Secure User Authentication**  
+  - User registration and login system
+  - Password hashing with bcrypt
+  - Session management with local storage
+  - Protected API endpoints
+
 ### Options Analysis
-- **Options Chain Lookup**  
-  Fetch live option chains from Polygon.io by ticker symbol.
+- **Stock Price Lookup**  
+  Fetch live stock prices from Polygon.io by ticker symbol.
 
 - **Black‑Scholes Pricing & Greeks**  
   Calculate theoretical call/put prices and the full suite of Greeks (Delta, Gamma, Theta, Vega, Rho).
@@ -19,7 +26,7 @@ A comprehensive Next.js‑based financial analysis platform that combines real�
 - **Interactive Payoff Diagrams**  
   Static expiration payoff curves with red/green shading for negative/positive P&L, plus reference lines for strike, current, and break‑even prices.
 
-- **Custom "Bento" UI**  
+- **Bento UI**  
   A modern, responsive grid layout to build positions manually:  
   - Ticker  
   - Strike Price  
@@ -30,10 +37,13 @@ A comprehensive Next.js‑based financial analysis platform that combines real�
 
 ### Portfolio Analysis
 - **Portfolio Management**  
+  - User-specific portfolio storage
   - Add and manage multiple positions
   - Track long and short positions
   - Real-time portfolio value calculation
   - Position distribution visualization
+  - Save and load multiple portfolios
+  - Intuitive dropdown interface for portfolio management
 
 - **Advanced Analytics**  
   - Alpha/Beta analysis
@@ -50,6 +60,7 @@ A comprehensive Next.js‑based financial analysis platform that combines real�
   - Local storage caching for positions
   - Cached analysis results with automatic refresh
   - Persistent form data across sessions
+  - Server-side portfolio storage
 
 ---
 
@@ -60,20 +71,27 @@ quant/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── options/route.ts     # GET /api/options → fetch option chain
-│   │   │   ├── price/route.ts       # POST /api/price  → compute price & Greeks
-│   │   │   ├── portfolio/route.ts   # POST /api/portfolio → analyze portfolio
-│   │   │   └── stocks/route.ts      # GET /api/stocks → fetch stock prices
+│   │   │   ├── auth/
+│   │   │   │   ├── login/route.ts    # POST /api/auth/login → user authentication
+│   │   │   │   └── signup/route.ts   # POST /api/auth/signup → user registration
+│   │   │   ├── user/
+│   │   │   │   └── portfolio/route.ts # User portfolio management endpoints
+│   │   │   ├── options/route.ts      # GET /api/options → fetch option chain
+│   │   │   ├── price/route.ts        # POST /api/price  → compute price & Greeks
+│   │   │   ├── portfolio/route.ts    # POST /api/portfolio → analyze portfolio
+│   │   │   └── stocks/route.ts       # GET /api/stocks → fetch stock prices
 │   │   ├── portfolio/
-│   │   │   └── page.tsx             # Portfolio analysis UI
-│   │   └── page.tsx                 # Options pricing UI
+│   │   │   └── page.tsx              # Portfolio analysis UI
+│   │   └── page.tsx                  # Options pricing UI
 │   ├── components/
-│   │   ├── PayoffDiagram.tsx        # Reusable payoff chart component
-│   │   └── PortfolioMetrics.tsx     # Portfolio metrics display
+│   │   ├── PayoffDiagram.tsx         # Reusable payoff chart component
+│   │   └── PortfolioMetrics.tsx      # Portfolio metrics display
 │   └── lib/
-│       └── calculations.ts          # Financial calculations utilities
-├── .env                            # Environment variables
-└── package.json                    # Dependencies & scripts
+│       ├── auth.ts                   # Authentication utilities
+│       ├── db.ts                     # Database connection & queries
+│       └── calculations.ts           # Financial calculations utilities
+├── .env                             # Environment variables
+└── package.json                     # Dependencies & scripts
 ```
 
 ---
@@ -97,6 +115,11 @@ quant/
    Create a `.env` file at the project root:
    ```env
    NEXT_PUBLIC_POLYGON_API_KEY=your_polygon_api_key_here
+   DB_HOST=your_db_host
+   DB_PORT=your_db_port
+   DB_USER=your_db_user
+   DB_PASSWORD=your_db_password
+   DB_NAME=your_db_name
    ```
 
 ---
@@ -124,6 +147,15 @@ quant/
 
 ## API Endpoints
 
+### `/api/auth/login` (POST)
+Authenticates a user and returns a session token.
+
+### `/api/auth/signup` (POST)
+Creates a new user account.
+
+### `/api/user/portfolio` (GET/POST)
+Manages user portfolios (list, save, load).
+
 ### `/api/options` (GET)
 Fetches the options chain for a given stock ticker.
 
@@ -144,6 +176,8 @@ Fetches current stock prices with caching support.
 - **Styling**: Tailwind CSS
 - **Charts**: Recharts
 - **Data**: Polygon.io API
+- **Database**: PostgreSQL (AWS)
+- **Authentication**: bcryptjs
 - **State Management**: React Hooks
 - **Caching**: LocalStorage
 - **Deployment**: Vercel
